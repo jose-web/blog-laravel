@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TestModels;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,3 +21,5 @@ Route::get('/', function () {
 Route::get('/test', function () {
     return "<h1>Test</h1>";
 });
+
+Route::get('/testModels',[TestModels::class,'index']);
