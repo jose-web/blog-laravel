@@ -33,7 +33,9 @@ class UserController extends Controller
                 );
             }else{
 
-                $pwd = password_hash($params->password, PASSWORD_BCRYPT, ['cost' => 5]); // password will be encrypted 5 times
+                //$pwd = password_hash($params->password, PASSWORD_BCRYPT, ['cost' => 5]); // password will be encrypted 5 times
+
+                $pwd = hash('sha256', $params->password);
 
                 $user = new User();
                 $user->role = 'ROLE_USER';
@@ -60,5 +62,40 @@ class UserController extends Controller
         }
 
         return response()->json($data, $data['code']);
+    }
+
+
+    public function login(Request $request){
+
+        $jwtAuth = new \JwtAuth();
+
+        $json = $request->input('json', null);
+        $params = json_decode($json);
+        $params_array = json_decode($json, true);
+
+
+        $validate = \Validator::make($params_array,[
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
+
+        if($validate->fails()){
+            $signup = array(
+                'status' => 'error',
+                'code' => 400,
+                'message' => 'User not found',
+                'errors' => $validate->errors()
+            );
+        }else{
+            $pwd = hash('sha256', $params->password);
+
+            $signup = $jwtAuth->signup($params->email, $pwd);
+
+            if(!empty($params->gettoken)){
+                $signup = $jwtAuth->signup($params->email, $pwd, true);
+            }
+        }
+
+        return response()->json($signup, 200);
     }
 }
